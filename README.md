@@ -45,6 +45,13 @@ Assumptions
 To Run:
 
 ```
+go run main.go --docker-image python --bash-command $'echo "Hello World"' --cloudwatch-group golang-test-task-group-1 --cloudwatch-stream golang-test-task-group-2 --aws-access-key-id ... --aws-secret-access-key ... --aws-region ap-southeast-1
+```
+To Build:
+
+```
+go build
+
 ./golang-test-task --docker-image python --bash-command $'echo "Hello World"' --cloudwatch-group golang-test-task-group-1 --cloudwatch-stream golang-test-task-group-2 --aws-access-key-id ... --aws-secret-access-key ... --aws-region ap-southeast-1
 ```
 
