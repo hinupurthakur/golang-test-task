@@ -1,6 +1,7 @@
 # golang-test-task
 golang test task for dstack.ai is a CLI client for creating Docker containers.
- Problem Statement:
+
+## Problem Statement:
 
  ```
  Write a program called golang-test-task that accepts the following arguments:
