@@ -49,15 +49,7 @@ func CreateContainer(image, bashCmd, group, stream, accessKey, secretKey, region
 		logrus.Errorln("unable to start the container", err)
 	}
 
-	statusCh, errCh := cli.ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
-	select {
-	case err := <-errCh:
-		if err != nil {
-			logrus.Errorln("unable to wait for contianer state", err)
-		}
-	case <-statusCh:
-	}
-	out, err := cli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true})
+	out, err := cli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true, Follow: true})
 	if err != nil {
 		logrus.Errorln("unable to fetch the container logs", err)
 	}
