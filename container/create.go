@@ -2,8 +2,8 @@ package container
 
 import (
 	"context"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/docker/docker/api/types"
@@ -62,11 +62,21 @@ func CreateContainer(image, bashCmd, group, stream, accessKey, secretKey, region
 		logrus.Errorln("unable to fetch the container logs", err)
 	}
 	defer out.Close()
-	body, err := ioutil.ReadAll(out)
-	if err != nil {
-		logrus.Error("unable to convert log stream to byte array", err)
+	p := make([]byte, 1024)
+
+	for {
+		n, err := out.Read(p)
+		if err != nil {
+			if err == io.EOF {
+				fmt.Println()
+				logger.SendLogsToCloudwatch(group, stream, string(p[:n])) // should handle any remainding bytes.
+				break
+			}
+			logrus.Errorln("unable to read logs", err)
+
+		}
+		logger.SendLogsToCloudwatch(group, stream, string(p[:n]))
 	}
-	logger.SendLogsToCloudwatch(group, stream, body)
 	defer out.Close()
 	return nil
 }

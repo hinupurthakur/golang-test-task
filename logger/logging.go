@@ -65,7 +65,7 @@ func EnsureLogGroupExists(name string) error {
 }
 
 // createLogStream checks if the log stream already exists in the group or not and creates if doesn't exists.
-func createLogStream(stream, group string) error {
+func createLogStream(stream, group string, input *cloudwatchlogs.PutLogEventsInput) error {
 	resp, err := cwl.DescribeLogStreams(&cloudwatchlogs.DescribeLogStreamsInput{LogGroupName: &group})
 	if err != nil {
 		logrus.Error(err)
@@ -74,6 +74,9 @@ func createLogStream(stream, group string) error {
 
 	for _, logStream := range resp.LogStreams {
 		if *logStream.LogStreamName == stream {
+			sequenceToken = *logStream.UploadSequenceToken
+			*input = *input.SetSequenceToken(sequenceToken)
+
 			return nil
 		}
 	}
@@ -88,7 +91,7 @@ func createLogStream(stream, group string) error {
 }
 
 // SendLogsToCloudwatch sends the dataByte to cloudwatch logs
-func SendLogsToCloudwatch(group, stream string, dataByte []byte) {
+func SendLogsToCloudwatch(group, stream string, dataByte string) {
 	var logQueue []*cloudwatchlogs.InputLogEvent
 
 	item := string(dataByte)
@@ -104,7 +107,7 @@ func SendLogsToCloudwatch(group, stream string, dataByte []byte) {
 		}
 
 		if sequenceToken == "" {
-			err := createLogStream(stream, group)
+			err := createLogStream(stream, group, &input)
 			if err != nil {
 				logrus.Errorln("unable to create log stream", err)
 			}
